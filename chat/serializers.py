@@ -8,9 +8,9 @@ class ChatRoomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChatRoom
-        fields = ['id', 'title', 'participants', 'messages']
+        fields = ['id', 'item', 'participants', 'messages']
         extra_kwargs = {
-            'item': {'write_only': True}
+            'participants': {'read_only': True}
         }
 
     def get_messages(self, obj):

@@ -17,15 +17,20 @@ class ChatRoomListView(generics.ListCreateAPIView):
     serializer_class = ChatRoomSerializer
     permission_classes = [IsAuthenticated]
 
-
     def perform_create(self, serializer):
         item_id = self.request.data.get('item')
-        item = get_object_or_404(Item, pk=item_id)
+        if item_id is None:
+            raise ValidationError({'item': 'This field is required.'})
+
+        try:
+            item = Item.objects.get(pk=item_id)
+        except Item.DoesNotExist:
+            raise NotFound(detail="No Item matches the given query.", code=404)
+
         seller = item.owner
         buyer = self.request.user
-        chatroom = serializer.save()
+        chatroom = serializer.save(item=item)
         chatroom.participants.add(seller, buyer)
-
 
 class ChatRoomDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ChatRoom.objects.all()
