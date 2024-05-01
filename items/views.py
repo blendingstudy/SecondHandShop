@@ -17,4 +17,3 @@ class ItemDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]  # 인증된 사용자만 수정/삭제 가능
-
