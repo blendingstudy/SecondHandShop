@@ -4,12 +4,15 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
+
+from chat.models import ChatRoom
 from .models import Transaction
 from items.models import Item
 from .serializers import TransactionSerializer
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
+# transactions/views.py
 
 class TransactionListCreateView(generics.ListCreateAPIView):
     queryset = Transaction.objects.all()
@@ -17,14 +20,23 @@ class TransactionListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        item_id = self.request.data.get('item_id')
-        if item_id is None:
-            raise ValidationError({'item_id': 'This field is required.'})
+        item = serializer.validated_data['item']
+        status = serializer.validated_data['status']
+        chatroom = serializer.validated_data['chatroom']
 
-        item = get_object_or_404(Item, pk=item_id)
+        participants = chatroom.participants.exclude(id=self.request.user.id)
+        if participants.exists():
+            buyer = participants.first()
+        else:
+            raise ValidationError("채팅방에 다른 참여자가 없습니다.")
+
         seller = item.owner
 
-        serializer.save(buyer=self.request.user, seller=seller, item=item)
+        serializer.save(buyer=buyer, seller=seller, item=item, status=status)
+
+        seller = item.owner
+
+        serializer.save(buyer=buyer, seller=seller, item=item, status=status, chatroom=chatroom)
 
 
 class TransactionDetailView(generics.RetrieveUpdateAPIView):
