@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Item List</h1>
+  <ul>
+    {% for item in items %}
+      <li>
+        <a href="{% url 'item-detail' item.pk %}">{{ item.title }}</a>
+        <p>Price: {{ item.price }}</p>
+        <p>Condition: {{ item.condition }}</p>
+      </li>
+    {% empty %}
+      <li>No items available.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
