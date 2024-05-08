@@ -1,7 +1,10 @@
 #chat/views.py
 from django.shortcuts import get_object_or_404
+from django.views import View
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import render, redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from items.models import Item
 from .models import Message, ChatRoom
@@ -67,3 +70,43 @@ class MessageDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated]
+
+class ChatRoomCreateView(LoginRequiredMixin, View):
+    def get(self, request):
+        item_id = request.GET.get('item')
+        item = Item.objects.get(id=item_id)
+        seller = item.owner
+        buyer = request.user
+
+        # 이미 존재하는 채팅방이 있는지 확인
+        chatroom = ChatRoom.objects.filter(item=item, participants=seller).filter(participants=buyer).first()
+
+        if not chatroom:
+            # 채팅방이 없으면 새로 생성
+            chatroom = ChatRoom.objects.create(item=item)
+            chatroom.participants.add(seller, buyer)
+
+        return render(request, 'chat/chatroom_detail.html', {'chatroom': chatroom})
+
+class MessageCreateView(LoginRequiredMixin, View):
+    def post(self, request):
+        chatroom_id = request.POST.get('chatroom')
+        text = request.POST.get('text')
+
+        chatroom = get_object_or_404(ChatRoom, id=chatroom_id)
+        user = request.user
+
+        Message.objects.create(chatroom=chatroom, user=user, text=text)
+
+        return redirect('chat:chatroom_detail', pk=chatroom.pk)
+
+class ChatRoomDetailView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        chatroom = get_object_or_404(ChatRoom, pk=pk)
+        messages = chatroom.message_set.all().order_by('timestamp')
+        return render(request, 'chat/chatroom_detail.html', {'chatroom': chatroom, 'messages': messages})
+
+class ChatRoomListView(LoginRequiredMixin, View):
+    def get(self, request):
+        chatrooms = request.user.chatrooms.all()
+        return render(request, 'chat/chatroom_list.html', {'chatrooms': chatrooms})

@@ -1,14 +1,17 @@
-<!-- templates/chat/chatroom_list.html -->
 {% extends 'base.html' %}
 
 {% block content %}
   <h1>Chatrooms</h1>
-  {% for chatroom in chatrooms %}
-    <div>
-      <a href="{% url 'chat:chatroom_detail' chatroom.id %}">{{ chatroom.item.title }}</a>
-      <p>Participants: {{ chatroom.participants.all|join:", " }}</p>
-    </div>
-  {% empty %}
+  {% if chatrooms %}
+    <ul>
+      {% for chatroom in chatrooms %}
+        <li>
+          <a href="{% url 'chat:chatroom_detail' chatroom.id %}">{{ chatroom.item.title }}</a>
+          <p>Participants: {{ chatroom.participants.all|join:", " }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
     <p>No chatrooms found.</p>
-  {% endfor %}
+  {% endif %}
 {% endblock %}

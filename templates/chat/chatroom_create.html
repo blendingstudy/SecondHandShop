@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Create Chatroom for {{ item.title }}</h1>
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="item" value="{{ item.id }}">
+    <button type="submit">Create Chatroom</button>
+  </form>
+{% endblock %}

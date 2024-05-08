@@ -1,10 +1,9 @@
-<!-- templates/chat/chatroom_detail.html -->
 {% extends 'base.html' %}
 
 {% block content %}
   <h1>Chatroom for {{ chatroom.item.title }}</h1>
   <div id="message-list">
-    {% for message in chatroom.messages.all %}
+    {% for message in messages %}
       <div>
         <strong>{{ message.user.username }}</strong>: {{ message.text }}
         <span>{{ message.timestamp }}</span>
@@ -14,7 +13,9 @@
     {% endfor %}
   </div>
 
-  <form id="message-form">
+  <form method="post" action="{% url 'chat:message_create' %}">
+    {% csrf_token %}
+    <input type="hidden" name="chatroom" value="{{ chatroom.id }}">
     <input type="text" name="text" placeholder="Type your message..." required>
     <button type="submit">Send</button>
   </form>

@@ -18,6 +18,11 @@ class ChatRoomSerializer(serializers.ModelSerializer):
         serializer = MessageSerializer(messages, many=True)
         return serializer.data
 
+    def create(self, validated_data):
+        item = validated_data.get('item')
+        chatroom = ChatRoom.objects.create(item=item)
+        return chatroom
+
 
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
