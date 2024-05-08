@@ -1,17 +1,20 @@
+<!-- templates/items/item_detail.html -->
 {% extends 'base.html' %}
 
 {% block content %}
   <h1>{{ item.title }}</h1>
-  <p>Description: {{ item.description }}</p>
+  <p>{{ item.description }}</p>
   <p>Price: {{ item.price }}</p>
   <p>Condition: {{ item.condition }}</p>
-  {% if item.video %}
-    <video controls>
-      <source src="{{ item.video.url }}" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
+  <p>Owner: {{ item.owner.username }}</p>
+
+  {% if user.is_authenticated and user != item.owner %}
+    <a href="{% url 'chat:chatroom_list' %}?item={{ item.id }}" class="btn btn-primary">Chat with Owner</a>
   {% endif %}
-  <p>Seller: {{ item.owner.username }}</p>
-  <p>Created at: {{ item.created_at }}</p>
-  <p>Updated at: {{ item.updated_at }}</p>
+
+  {% if user == item.owner %}
+    <a href="{% url 'items:item_update' item.id %}" class="btn btn-secondary">Edit Item</a>
+  {% endif %}
+
+  <h2>Transaction Status: {{ transaction.status }}</h2>
 {% endblock %}

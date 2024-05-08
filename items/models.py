@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.urls import reverse
 # from django.db.models.signals import post_migrate
 # from django.dispatch import receiver
 
@@ -34,6 +35,9 @@ class Item(models.Model):
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse('items:item-detail', kwargs={'pk': self.pk})
 
 # @receiver(post_migrate)
 # def create_initial_categories(sender, **kwargs):

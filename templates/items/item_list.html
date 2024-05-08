@@ -5,9 +5,17 @@
   <ul>
     {% for item in items %}
       <li>
-        <a href="{% url 'item-detail' item.pk %}">{{ item.title }}</a>
+        <a href="{% url 'items:item-detail' item.pk %}">{{ item.title }}</a>
+        <p>Description: {{ item.description }}</p>
         <p>Price: {{ item.price }}</p>
         <p>Condition: {{ item.condition }}</p>
+        {% if item.video %}
+          <p>Video: <a href="{{ item.video }}" target="_blank">View Video</a></p>
+        {% endif %}
+        <p>Seller: {{ item.owner.get_username }}</p>
+        <p>Created at: {{ item.created_at }}</p>
+        <p>Updated at: {{ item.updated_at }}</p>
+        <p>Is Active: {{ item.is_active|yesno:"Yes,No" }}</p>
       </li>
     {% empty %}
       <li>No items available.</li>

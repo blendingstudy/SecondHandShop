@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "chat.apps.ChatConfig",
     "rest_framework",
     "rest_framework.authtoken",
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -138,3 +139,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ## 추가
 AUTH_USER_MODEL = 'users.CustomUser'
+# LOGOUT_REDIRECT_URL = '/'
+CRISPY_TEMPLATE_PACK = 'bootstrap3'

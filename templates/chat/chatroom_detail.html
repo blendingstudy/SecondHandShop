@@ -1,0 +1,32 @@
+<!-- templates/chat/chatroom_detail.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Chatroom for {{ chatroom.item.title }}</h1>
+  <div id="message-list">
+    {% for message in chatroom.messages.all %}
+      <div>
+        <strong>{{ message.user.username }}</strong>: {{ message.text }}
+        <span>{{ message.timestamp }}</span>
+      </div>
+    {% empty %}
+      <p>No messages yet.</p>
+    {% endfor %}
+  </div>
+
+  <form id="message-form">
+    <input type="text" name="text" placeholder="Type your message..." required>
+    <button type="submit">Send</button>
+  </form>
+
+  {% if user == chatroom.item.owner %}
+    <form id="transaction-form">
+      <select name="status">
+        <option value="initiated">Initiated</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <button type="submit">Update Transaction Status</button>
+    </form>
+  {% endif %}
+{% endblock %}
