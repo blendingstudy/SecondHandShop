@@ -1,7 +1,9 @@
+<!-- items/item_list.html -->
+
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>Item List</h1>
+  <h1>Items</h1>
   <ul>
     {% for item in items %}
       <li>
@@ -9,16 +11,14 @@
         <p>Description: {{ item.description }}</p>
         <p>Price: {{ item.price }}</p>
         <p>Condition: {{ item.condition }}</p>
-        {% if item.video %}
-          <p>Video: <a href="{{ item.video }}" target="_blank">View Video</a></p>
-        {% endif %}
-        <p>Seller: {{ item.owner.get_username }}</p>
+        <p>Video: <a href="{{ item.video.url }}">View Video</a></p>
+        <p>Seller: {{ item.owner.username }}</p>
         <p>Created at: {{ item.created_at }}</p>
         <p>Updated at: {{ item.updated_at }}</p>
         <p>Is Active: {{ item.is_active|yesno:"Yes,No" }}</p>
       </li>
     {% empty %}
-      <li>No items available.</li>
+      <li>No items yet.</li>
     {% endfor %}
   </ul>
 {% endblock %}

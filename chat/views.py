@@ -100,11 +100,35 @@ class MessageCreateView(LoginRequiredMixin, View):
 
         return redirect('chat:chatroom_detail', pk=chatroom.pk)
 
+
 class ChatRoomDetailView(LoginRequiredMixin, View):
     def get(self, request, pk):
         chatroom = get_object_or_404(ChatRoom, pk=pk)
         messages = chatroom.message_set.all().order_by('timestamp')
+
+        if request.GET.get('status'):
+            transaction = chatroom.transaction_set.first()
+            if transaction:
+                item = transaction.item
+                transaction.status = request.GET.get('status')
+                transaction.save()
+
+                if transaction.status == 'completed':
+                    item.is_active = False
+                else:
+                    item.is_active = True
+                item.save()
+
         return render(request, 'chat/chatroom_detail.html', {'chatroom': chatroom, 'messages': messages})
+
+    def post(self, request, pk):
+        chatroom = get_object_or_404(ChatRoom, pk=pk)
+        text = request.POST.get('text')
+
+        if text:
+            Message.objects.create(chatroom=chatroom, user=request.user, text=text)
+
+        return redirect('chat:chatroom_detail', pk=chatroom.pk)
 
 class ChatRoomListView(LoginRequiredMixin, View):
     def get(self, request):

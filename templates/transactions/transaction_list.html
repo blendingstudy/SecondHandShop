@@ -1,0 +1,22 @@
+<!-- transactions/transaction_list.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>My Transactions</h1>
+  <ul>
+    {% for transaction in transactions %}
+      <li>
+        <a href="{% url 'transactions:transaction-detail' transaction.pk %}">
+          Item: {{ transaction.item.name }}
+        </a>
+        Status: {{ transaction.get_status_display }}
+        Buyer: {{ transaction.buyer.username }}
+        Seller: {{ transaction.seller.username }}
+        Created: {{ transaction.created_at }}
+      </li>
+    {% empty %}
+      <li>No transactions yet.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

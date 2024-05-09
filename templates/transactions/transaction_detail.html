@@ -1,0 +1,21 @@
+<!-- transactions/transaction_detail.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Transaction Details</h1>
+  <p>Item: {{ transaction.item.name }}</p>
+  <p>Status: {{ transaction.get_status_display }}</p>
+  <p>Buyer: {{ transaction.buyer.username }}</p>
+  <p>Seller: {{ transaction.seller.username }}</p>
+  <p>Created: {{ transaction.created_at }}</p>
+  <p>Updated: {{ transaction.updated_at }}</p>
+
+  {% if request.user == transaction.seller %}
+    <form method="post" action="{% url 'transactions:transaction-detail' transaction.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="status" value="completed">
+      <button type="submit">Mark as Completed</button>
+    </form>
+  {% endif %}
+{% endblock %}
