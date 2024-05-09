@@ -6,11 +6,12 @@
   <p>{{ item.description }}</p>
   <p>Price: {{ item.price }}</p>
   <p>Condition: {{ item.condition }}</p>
+  <p>Category: {{ item.category.name }}</p>
   <p>Owner: {{ item.owner.username }}</p>
 
-{% if user.is_authenticated and user != item.owner %}
-  <a href="{% url 'chat:chatroom_create' %}?item={{ item.id }}" class="btn btn-primary">Chat with Owner</a>
-{% endif %}
+  {% if user.is_authenticated and user != item.owner %}
+    <a href="{% url 'chat:chatroom_create' %}?item={{ item.id }}" class="btn btn-primary">Chat with Owner</a>
+  {% endif %}
 
   {% if user == item.owner %}
     <a href="{% url 'items:item_update' item.id %}" class="btn btn-secondary">Edit Item</a>

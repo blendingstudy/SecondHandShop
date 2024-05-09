@@ -1,7 +1,7 @@
 # items/views.py
 from rest_framework import generics
-from .models import Item
-from .serializers import ItemSerializer
+from .models import Item, Category
+from .serializers import ItemSerializer, CategorySerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
@@ -43,3 +43,24 @@ class ItemUpdateView(UpdateView):
     model = Item
     form_class = ItemForm
     template_name = 'items/item_form.html'
+
+class CategoryListView(generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+class SearchView(generics.ListAPIView):
+    serializer_class = ItemSerializer
+
+    def get_queryset(self):
+        query = self.request.query_params.get('q', '')
+        category = self.request.query_params.get('category', None)
+
+        queryset = Item.objects.filter(is_active=True)
+
+        if query:
+            queryset = queryset.filter(Q(title__icontains=query) | Q(description__icontains=query))
+
+        if category:
+            queryset = queryset.filter(category__id=category)
+
+        return queryset

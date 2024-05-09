@@ -11,6 +11,7 @@
         <p>Description: {{ item.description }}</p>
         <p>Price: {{ item.price }}</p>
         <p>Condition: {{ item.condition }}</p>
+        <p>Category: {{ item.category.name }}</p>
         <p>Video: <a href="{{ item.video.url }}">View Video</a></p>
         <p>Seller: {{ item.owner.username }}</p>
         <p>Created at: {{ item.created_at }}</p>
