@@ -3,7 +3,7 @@
 {% block content %}
   <h1>Search Results</h1>
 
-  <form method="get" action="{% url 'items:search' %}">
+  <form method="get" action="{% url 'items:search_results' %}">
     <input type="text" name="q" placeholder="Search items..." value="{{ request.GET.q }}">
     <select name="category">
       <option value="">All categories</option>
@@ -20,15 +20,9 @@
     {% for item in items %}
       <li>
         <a href="{% url 'items:item-detail' item.pk %}">{{ item.title }}</a>
-        <p>Description: {{ item.description }}</p>
+        <p>{{ item.description }}</p>
         <p>Price: {{ item.price }}</p>
-        <p>Condition: {{ item.condition }}</p>
-        <p>Category: {{ item.category.name }}</p>
-        <p>Video: {% if item.video %}<a href="{{ item.video.url }}">View Video</a>{% endif %}</p>
-        <p>Seller: {{ item.owner.username }}</p>
-        <p>Created at: {{ item.created_at }}</p>
-        <p>Updated at: {{ item.updated_at }}</p>
-        <p>Is Active: {{ item.is_active|yesno:"Yes,No" }}</p>
+        <!-- 다른 필드 정보 추가 -->
       </li>
     {% empty %}
       <li>No items found.</li>

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Search Results</h1>
+
+  <form method="get" action="{% url 'search_results' %}">
+    <input type="text" name="q" placeholder="Search items..." value="{{ request.GET.q }}">
+    <button type="submit">Search</button>
+  </form>
+
+  <ul>
+    {% for item in items %}
+      <li>
+        <a href="{% url 'item_detail' item.pk %}">{{ item.title }}</a>
+        <p>{{ item.description }}</p>
+        <p>Price: {{ item.price }}</p>
+      </li>
+    {% empty %}
+      <li>No items found.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

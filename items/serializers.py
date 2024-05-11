@@ -15,13 +15,15 @@ class ItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Item
-        fields = ['id', 'owner', 'title', 'description', 'price', 'condition', 'video', 'created_at', 'updated_at', 'is_active']
-        read_only_fields = ['owner']
+        fields = ['id', 'owner', 'title', 'description', 'price', 'condition', 'category', 'video', 'created_at', 'updated_at', 'is_active', 'category_name']
+        read_only_fields = ['owner', 'category_name']
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         if instance.category:
             representation['category'] = CategorySerializer(instance.category).data
+        else:
+            representation['category'] = None
         return representation
 
     def get_video(self, obj):

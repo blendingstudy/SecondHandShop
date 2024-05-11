@@ -1,7 +1,7 @@
 # items/urls.py
 from django.urls import path
 from .views import ItemListView, ItemListAPI, ItemDetailAPI, ItemDetailView, ItemCreateView, ItemUpdateView, \
-    CategoryListView, SearchView
+    CategoryListView, SearchView, SearchResultsView
 
 app_name = 'items'
 urlpatterns = [
@@ -16,4 +16,5 @@ urlpatterns = [
     path('create/', ItemCreateView.as_view(), name='item_create'),
     path('<int:pk>/update/', ItemUpdateView.as_view(), name='item_update'),
     path('api/<int:pk>/', ItemDetailAPI.as_view(), name='item-detail-api'),
+    path('search/', SearchResultsView.as_view(), name='search_results'),
 ]

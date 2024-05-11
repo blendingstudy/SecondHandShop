@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from .forms import ItemForm
+from django.db.models import Q
 
 class ItemListAPI(generics.ListCreateAPIView):
     queryset = Item.objects.all()
@@ -50,12 +51,13 @@ class CategoryListView(generics.ListAPIView):
 
 class SearchView(generics.ListAPIView):
     serializer_class = ItemSerializer
+    template_name = 'items/item_list.html'
 
     def get_queryset(self):
-        query = self.request.query_params.get('q', '')
-        category = self.request.query_params.get('category', None)
-
-        queryset = Item.objects.filter(is_active=True)
+        queryset = Item.objects.all()
+        query = self.request.GET.get('q', '')
+        category = self.request.GET.get('category', None)
+        is_active = self.request.GET.get('is_active', None)
 
         if query:
             queryset = queryset.filter(Q(title__icontains=query) | Q(description__icontains=query))
@@ -63,4 +65,36 @@ class SearchView(generics.ListAPIView):
         if category:
             queryset = queryset.filter(category__id=category)
 
+        if is_active:
+            queryset = queryset.filter(is_active=True)
+
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()
+        return context
+
+class SearchResultsView(ListView):
+    model = Item
+    template_name = 'items/search_results.html'
+    context_object_name = 'items'
+
+    def get_queryset(self):
+        query = self.request.GET.get('q', '')
+        category_id = self.request.GET.get('category')
+        is_active = self.request.GET.get('is_active', None)
+
+        queryset = Item.objects.all()
+
+        if query:
+            queryset = queryset.filter(title__icontains=query)
+
+        if category_id:
+            queryset = queryset.filter(category__id=category_id)
+
+        if is_active:
+            queryset = queryset.filter(is_active=True)
+
+        return queryset
+
