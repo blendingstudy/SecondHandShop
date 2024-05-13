@@ -2,7 +2,7 @@
 
 from django.urls import path
 from .views import ChatRoomListView, ChatRoomDetailView, MessageListView, MessageDetailView, ChatRoomMessageListView, \
-    ChatRoomCreateView, MessageCreateView
+    ChatRoomCreateView, MessageCreateView, UpdateTransactionStatusView
 
 app_name = 'chat'
 
@@ -15,4 +15,6 @@ urlpatterns = [
 
     path('chatrooms/create/', ChatRoomCreateView.as_view(), name='chatroom_create'),
     path('messages/create/', MessageCreateView.as_view(), name='message_create'),
+
+    path('chatrooms/<int:pk>/update-transaction-status/', UpdateTransactionStatusView.as_view(), name='update_transaction_status'),
 ]

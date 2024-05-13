@@ -1,4 +1,3 @@
-# items/views.py
 from rest_framework import generics
 from .models import Item, Category
 from .serializers import ItemSerializer, CategorySerializer
@@ -25,6 +24,9 @@ class ItemListView(ListView):
     model = Item
     template_name = 'items/item_list.html'
     context_object_name = 'items'
+
+    def get_queryset(self):
+        return Item.objects.filter(is_active=True)
 
 class ItemDetailView(DetailView):
     model = Item
@@ -97,4 +99,3 @@ class SearchResultsView(ListView):
             queryset = queryset.filter(is_active=True)
 
         return queryset
-

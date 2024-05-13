@@ -20,12 +20,13 @@
     <button type="submit">Send</button>
   </form>
 
-  {% if user == chatroom.item.owner %}
-    <form id="transaction-form">
+  {% if chatroom.transaction_chatroom and request.user == chatroom.transaction_chatroom.seller %}
+    <form id="transaction-form" method="post" action="{% url 'chat:update_transaction_status' chatroom.pk %}">
+      {% csrf_token %}
       <select name="status">
-        <option value="initiated">Initiated</option>
-        <option value="completed">Completed</option>
-        <option value="cancelled">Cancelled</option>
+        {% for status_value, status_label in chatroom.transaction_chatroom.STATUS_CHOICES %}
+          <option value="{{ status_value }}" {% if chatroom.transaction_chatroom.status == status_value %}selected{% endif %}>{{ status_label }}</option>
+        {% endfor %}
       </select>
       <button type="submit">Update Transaction Status</button>
     </form>

@@ -19,4 +19,5 @@ urlpatterns = [
     path('contact/', TemplateView.as_view(template_name='contact.html'), name='contact'),
 
     path('chat/', include(('chat.urls', 'chat'), namespace='chat')),
+    path('transactions/', include('transactions.urls', namespace='transactions')),  #
 ]

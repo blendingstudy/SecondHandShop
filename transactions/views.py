@@ -1,44 +1,32 @@
-# transactions/views.py
-
+from django.db.models import Q
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404, render
 from rest_framework.exceptions import ValidationError
 
 from chat.models import ChatRoom
-from .models import Transaction
-from items.models import Item
 from .serializers import TransactionSerializer
-from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-
-# transactions/views.py
+from django.views.generic import ListView
+from .models import Transaction
 
 class TransactionListCreateView(generics.ListCreateAPIView):
-    queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        user = self.request.user
+        return Transaction.objects.filter(Q(buyer=user) | Q(seller=user))
+
     def perform_create(self, serializer):
         item = serializer.validated_data['item']
-        status = serializer.validated_data['status']
         chatroom = serializer.validated_data['chatroom']
+        seller = item.owner
+        buyer = chatroom.participants.exclude(id=seller.id).first()
 
-        participants = chatroom.participants.exclude(id=self.request.user.id)
-        if participants.exists():
-            buyer = participants.first()
+        if buyer:
+            serializer.save(buyer=buyer, seller=seller, item=item, status='initiated', chatroom=chatroom)
         else:
             raise ValidationError("채팅방에 다른 참여자가 없습니다.")
-
-        seller = item.owner
-
-        serializer.save(buyer=buyer, seller=seller, item=item, status=status)
-
-        seller = item.owner
-
-        serializer.save(buyer=buyer, seller=seller, item=item, status=status, chatroom=chatroom)
-
-
 
 class TransactionDetailView(generics.RetrieveUpdateAPIView):
     queryset = Transaction.objects.all()
@@ -56,8 +44,6 @@ class TransactionDetailView(generics.RetrieveUpdateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        transaction.refresh_from_db()
-
         if previous_status != 'completed' and transaction.status == 'completed':
             item = transaction.item
             item.is_active = False
@@ -65,10 +51,11 @@ class TransactionDetailView(generics.RetrieveUpdateAPIView):
 
         return Response(serializer.data)
 
-class TransactionListCreateView(generics.ListCreateAPIView):
-    serializer_class = TransactionSerializer
-    permission_classes = [IsAuthenticated]
+class TransactionListView(ListView):
+    model = Transaction
+    template_name = 'transactions/transaction_list.html'
+    context_object_name = 'transactions'
 
     def get_queryset(self):
         user = self.request.user
-        return Transaction.objects.filter(Q(buyer=user) | Q(seller=user))
+        return Transaction.objects.filter(Q(buyer=user) | Q(seller=user), status='completed')

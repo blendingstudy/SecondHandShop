@@ -1,4 +1,4 @@
-#chat/models.py
+# chat/models.py
 
 from django.db import models
 from django.conf import settings
@@ -11,6 +11,7 @@ class ChatRoom(models.Model):
     item = models.ForeignKey(Item, on_delete=models.SET_NULL, null=True, related_name='chatrooms')
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='chatrooms')
     messages = models.ManyToManyField('Message', related_name='chatrooms')
+    transaction = models.ForeignKey('transactions.Transaction', on_delete=models.SET_NULL, null=True, related_name='chatrooms')
 
     @property
     def title(self):

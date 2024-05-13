@@ -1,5 +1,3 @@
-<!-- transactions/transaction_list.html -->
-
 {% extends 'base.html' %}
 
 {% block content %}
@@ -7,16 +5,21 @@
   <ul>
     {% for transaction in transactions %}
       <li>
-        <a href="{% url 'transactions:transaction-detail' transaction.pk %}">
-          Item: {{ transaction.item.name }}
-        </a>
-        Status: {{ transaction.get_status_display }}
-        Buyer: {{ transaction.buyer.username }}
-        Seller: {{ transaction.seller.username }}
-        Created: {{ transaction.created_at }}
+        <h3>Item: {{ transaction.item.title }}</h3>
+        <p>Status: {{ transaction.get_status_display }}</p>
+        {% if transaction.status == 'completed' %}
+          <p>This transaction has been completed.</p>
+        {% endif %}
+        <p>Buyer: {{ transaction.buyer.username }}</p>
+        <p>Seller: {{ transaction.seller.username }}</p>
+        <p>Created at: {{ transaction.created_at }}</p>
+        <p>Updated at: {{ transaction.updated_at }}</p>
+        {% if transaction.chatroom %}
+          <p>Chatroom: <a href="{% url 'chat:chatroom_detail' transaction.chatroom.pk %}">{{ transaction.chatroom.name }}</a></p>
+        {% endif %}
       </li>
     {% empty %}
-      <li>No transactions yet.</li>
+      <li>You have no transactions yet.</li>
     {% endfor %}
   </ul>
 {% endblock %}

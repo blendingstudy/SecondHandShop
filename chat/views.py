@@ -1,4 +1,4 @@
-#chat/views.py
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views import View
 from rest_framework import generics
@@ -7,13 +7,11 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from items.models import Item
+from transactions.models import Transaction
 from .models import Message, ChatRoom
 from .serializers import MessageSerializer, ChatRoomSerializer
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.generics import ListAPIView
-from .serializers import MessageSerializer
-from .models import Message
-
 
 class ChatRoomListView(generics.ListCreateAPIView):
     queryset = ChatRoom.objects.all()
@@ -47,7 +45,6 @@ class ChatRoomMessageListView(ListAPIView):
         chatroom_id = self.kwargs.get('chatroom_id')
         return Message.objects.filter(chatroom__id=chatroom_id)
 
-
 class MessageListView(generics.ListCreateAPIView):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
@@ -78,11 +75,9 @@ class ChatRoomCreateView(LoginRequiredMixin, View):
         seller = item.owner
         buyer = request.user
 
-        # 이미 존재하는 채팅방이 있는지 확인
         chatroom = ChatRoom.objects.filter(item=item, participants=seller).filter(participants=buyer).first()
 
         if not chatroom:
-            # 채팅방이 없으면 새로 생성
             chatroom = ChatRoom.objects.create(item=item)
             chatroom.participants.add(seller, buyer)
 
@@ -100,35 +95,53 @@ class MessageCreateView(LoginRequiredMixin, View):
 
         return redirect('chat:chatroom_detail', pk=chatroom.pk)
 
-
 class ChatRoomDetailView(LoginRequiredMixin, View):
     def get(self, request, pk):
         chatroom = get_object_or_404(ChatRoom, pk=pk)
         messages = chatroom.message_set.all().order_by('timestamp')
-
-        if request.GET.get('status'):
-            transaction = chatroom.transaction_set.first()
-            if transaction:
-                item = transaction.item
-                transaction.status = request.GET.get('status')
-                transaction.save()
-
-                if transaction.status == 'completed':
-                    item.is_active = False
-                else:
-                    item.is_active = True
-                item.save()
-
         return render(request, 'chat/chatroom_detail.html', {'chatroom': chatroom, 'messages': messages})
 
     def post(self, request, pk):
         chatroom = get_object_or_404(ChatRoom, pk=pk)
         text = request.POST.get('text')
 
+        if not chatroom.transaction:
+            self.create_transaction(chatroom)
+
         if text:
             Message.objects.create(chatroom=chatroom, user=request.user, text=text)
 
         return redirect('chat:chatroom_detail', pk=chatroom.pk)
+
+    def create_transaction(self, chatroom):
+        item = chatroom.item
+        seller = item.owner
+        buyer = chatroom.participants.exclude(id=seller.id).first()
+
+        if buyer:
+            transaction = Transaction.objects.create(item=item, seller=seller, buyer=buyer, status='initiated', chatroom=chatroom)
+            chatroom.transaction = transaction
+            chatroom.save()
+
+class UpdateTransactionStatusView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        chatroom = get_object_or_404(ChatRoom, pk=pk)
+        transaction = chatroom.transaction
+        new_status = request.POST.get('status')
+
+        if transaction and transaction.seller == request.user and new_status in [choice[0] for choice in Transaction.STATUS_CHOICES]:
+            previous_status = transaction.status
+            transaction.status = new_status
+            transaction.save()
+
+            if previous_status != 'completed' and new_status == 'completed':
+                item = transaction.item
+                item.is_active = False
+                item.save()
+
+            return JsonResponse({'status': 'success'})
+
+        return JsonResponse({'status': 'error'})
 
 class ChatRoomListView(LoginRequiredMixin, View):
     def get(self, request):
